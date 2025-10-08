@@ -16,6 +16,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
 
+  const [zoomLevel, setZoomLevel] = useState(0.01); // giá trị mặc định
   // Lấy vị trí hiện tại của người dùng
   useEffect(() => {
     (async () => {
@@ -81,6 +82,40 @@ export default function App() {
     setRouteCoords([]);
   };
 
+  // Zoom In
+  const zoomIn = () => {
+    if (mapRef.current && userLoc) {
+      const newZoom = zoomLevel / 2;
+      setZoomLevel(newZoom);
+      mapRef.current.animateToRegion(
+        {
+          latitude: userLoc.latitude,
+          longitude: userLoc.longitude,
+          latitudeDelta: newZoom,
+          longitudeDelta: newZoom,
+        },
+        200
+      );
+    }
+  };
+
+  // Zoom Out
+  const zoomOut = () => {
+    if (mapRef.current && userLoc) {
+      const newZoom = zoomLevel * 2;
+      setZoomLevel(newZoom);
+      mapRef.current.animateToRegion(
+        {
+          latitude: userLoc.latitude,
+          longitude: userLoc.longitude,
+          latitudeDelta: newZoom,
+          longitudeDelta: newZoom,
+        },
+        200
+      );
+    }
+  };
+
   if (loading)
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -107,6 +142,8 @@ export default function App() {
       <Controls
         onCenter={centerOnUser}
         onClear={clearRoute}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
         loading={routeLoading}
       />
 
