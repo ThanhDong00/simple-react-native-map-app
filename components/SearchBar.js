@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   TextInput,
@@ -12,13 +12,18 @@ import {
 const SearchBar = ({ onSearch, results, onSelectResult }) => {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const typingTimeout = useRef(null);
 
   const handleChange = async (text) => {
     setQuery(text);
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
     if (text.trim().length === 0) return;
-    setLoading(true);
-    await onSearch(text);
-    setLoading(false);
+
+    typingTimeout.current = setTimeout(async () => {
+        setLoading(true);
+        await onSearch(text);
+        setLoading(false);
+    }, 600);
   };
 
   return (
