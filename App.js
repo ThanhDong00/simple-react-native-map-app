@@ -16,7 +16,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
 
-  const [zoomLevel, setZoomLevel] = useState(0.01); // giá trị mặc định
+  const [mapRegion, setMapRegion] = useState(null);
   // Lấy vị trí hiện tại của người dùng
   useEffect(() => {
     (async () => {
@@ -82,38 +82,37 @@ export default function App() {
     setRouteCoords([]);
   };
 
-  // Zoom In
+  const MIN_DELTA = 0.0005;
+
   const zoomIn = () => {
-    if (mapRef.current && userLoc) {
-      const newZoom = zoomLevel / 2;
-      setZoomLevel(newZoom);
-      mapRef.current.animateToRegion(
-        {
-          latitude: userLoc.latitude,
-          longitude: userLoc.longitude,
-          latitudeDelta: newZoom,
-          longitudeDelta: newZoom,
-        },
-        200
-      );
-    }
+    if (!mapRef.current || !mapRegion) return;
+
+    const newLatDelta = Math.max(mapRegion.latitudeDelta / 3, MIN_DELTA);
+    const newLonDelta = Math.max(mapRegion.longitudeDelta / 3, MIN_DELTA);
+
+    mapRef.current.animateToRegion(
+      {
+        ...mapRegion,
+        latitudeDelta: newLatDelta,
+        longitudeDelta: newLonDelta,
+      },
+      250
+    );
   };
 
-  // Zoom Out
   const zoomOut = () => {
-    if (mapRef.current && userLoc) {
-      const newZoom = zoomLevel * 2;
-      setZoomLevel(newZoom);
-      mapRef.current.animateToRegion(
-        {
-          latitude: userLoc.latitude,
-          longitude: userLoc.longitude,
-          latitudeDelta: newZoom,
-          longitudeDelta: newZoom,
-        },
-        200
-      );
-    }
+    if (!mapRef.current || !mapRegion) return;
+
+    const newZoom = mapRegion.latitudeDelta * 2;
+
+    mapRef.current.animateToRegion(
+      {
+        ...mapRegion,
+        latitudeDelta: newZoom,
+        longitudeDelta: newZoom,
+      },
+      300
+    );
   };
 
   if (loading)
@@ -131,6 +130,7 @@ export default function App() {
         userLoc={userLoc}
         destination={destination}
         routeCoords={routeCoords}
+        onRegionChangeComplete={setMapRegion}
       />
 
       <SearchBar

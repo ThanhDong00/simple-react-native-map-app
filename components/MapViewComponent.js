@@ -3,7 +3,9 @@ import { Platform, StyleSheet } from "react-native";
 import MapView, { UrlTile, Marker, Polyline } from "react-native-maps";
 
 const MapViewComponent = forwardRef(
-  ({ userLoc, destination, routeCoords }, ref) => {
+  ({ userLoc, destination, routeCoords, onRegionChangeComplete }, ref) => {
+    if (!userLoc) return null;
+
     return (
       <MapView
         ref={ref}
@@ -14,8 +16,9 @@ const MapViewComponent = forwardRef(
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
+        onRegionChangeComplete={onRegionChangeComplete}
         mapType={Platform.OS === "android" ? "none" : "standard"}
-        showsUserLocation
+        showsUserLocation={true}
         showsMyLocationButton={false}
       >
         <UrlTile
@@ -25,7 +28,10 @@ const MapViewComponent = forwardRef(
         />
 
         {destination && (
-          <Marker coordinate={destination} title={destination.name} />
+          <Marker
+            coordinate={destination}
+            title={destination.name || "Điểm đến"}
+          />
         )}
 
         {routeCoords.length > 0 && (
